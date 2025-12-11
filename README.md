@@ -40,7 +40,8 @@ http://localhost:3000/api/todos?completed=false
 
 # Фильтр по приоритету:
 http://localhost:3000/api/todos?priority=high
-####Получить задачи по конкретному дню
+
+#Получить задачи по конкретному дню
 # Браузер:
 http://localhost:3000/api/todos/day/Понедельник
 http://localhost:3000/api/todos/day/Вторник
@@ -50,6 +51,37 @@ http://localhost:3000/api/todos/day/Пятница
 http://localhost:3000/api/todos/day/Суббота
 http://localhost:3000/api/todos/day/Воскресенье
 
+#Получить задачу по ID
+# ID 1, 2, 3 и т.д.:
+http://localhost:3000/api/todos/1
+http://localhost:3000/api/todos/2
+http://localhost:3000/api/todos/3
+
+#Создать новую задачу
+# Terminal (curl):
+curl -X POST http://localhost:3000/api/todos \
+  -H "Content-Type: application/json" \
+  -d '{
+    "day": "Понедельник",
+    "task": "Новая задача",
+    "time": "10:00",
+    "priority": "medium"
+  }'
+
+
+  # Обновить задачу с ID 1:
+curl -X PUT http://localhost:3000/api/todos/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "Обновленная задача",
+    "completed": true
+  }'
+
+  # Удалить задачу с ID 1:
+curl -X DELETE http://localhost:3000/api/todos/1
+
+# Переключить статус задачи с ID 1:
+curl -X PATCH http://localhost:3000/api/todos/1/toggle
 
 ### Установка
 ```bash
