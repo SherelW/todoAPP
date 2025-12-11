@@ -7,19 +7,18 @@ const logger = (req, res, next) => {
   
   console.log(`[${timestamp}] ${method} ${url} - IP: ${ip}`);
   
-  // Логирование тела запроса для POST/PUT запросов
+
   if (['POST', 'PUT'].includes(method)) {
-    console.log('📦 Тело запроса:', req.body);
+    console.log('Тело запроса:', req.body);
   }
-  
-  // Логирование query-параметров
+
   if (Object.keys(req.query).length > 0) {
-    console.log('🔍 Query-параметры:', req.query);
+    console.log('Query-параметры:', req.query);
   }
   
-  // Логирование параметров маршрута
+
   if (Object.keys(req.params).length > 0) {
-    console.log('📍 Параметры маршрута:', req.params);
+    console.log('Параметры маршрута:', req.params);
   }
   
   next();

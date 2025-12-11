@@ -83,8 +83,7 @@ curl -X DELETE http://localhost:3000/api/todos/1
 # Переключить статус задачи с ID 1:
 curl -X PATCH http://localhost:3000/api/todos/1/toggle
 
-### Установка
-```bash
-git clone https://github.com/SherelW/todo-weekly-app.git
-cd todo-weekly-app
+# Установка
+git clone https://github.com/SherelW/todoAPP.git
+cd todoAPP
 npm install

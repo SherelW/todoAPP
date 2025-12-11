@@ -1,10 +1,9 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-// Путь к файлу с данными
 const dataPath = path.join(__dirname, '../data/todos.json');
 
-// Вспомогательная функция для чтения данных
+
 const readData = async () => {
   try {
     const data = await fs.readFile(dataPath, 'utf8');
@@ -15,7 +14,7 @@ const readData = async () => {
   }
 };
 
-// Вспомогательная функция для записи данных
+
 const writeData = async (data) => {
   try {
     await fs.writeFile(dataPath, JSON.stringify(data, null, 2), 'utf8');
@@ -25,20 +24,18 @@ const writeData = async (data) => {
   }
 };
 
-// Получить все задачи
+
 const getAllTodos = async (req, res) => {
   try {
     const data = await readData();
-    
-    // Фильтрация по дню недели (query параметр)
+
     if (req.query.day) {
       const filteredTodos = data.todos.filter(todo => 
         todo.day.toLowerCase() === req.query.day.toLowerCase()
       );
       return res.json(filteredTodos);
     }
-    
-    // Фильтрация по статусу выполнения
+
     if (req.query.completed !== undefined) {
       const isCompleted = req.query.completed === 'true';
       const filteredTodos = data.todos.filter(todo => 
@@ -46,23 +43,20 @@ const getAllTodos = async (req, res) => {
       );
       return res.json(filteredTodos);
     }
-    
-    // Фильтрация по приоритету
+
     if (req.query.priority) {
       const filteredTodos = data.todos.filter(todo => 
         todo.priority === req.query.priority
       );
       return res.json(filteredTodos);
     }
-    
-    // Если нет фильтров - возвращаем все задачи
+
     res.json(data.todos);
   } catch (error) {
     res.status(500).json({ error: 'Ошибка при получении задач' });
   }
 };
 
-// Получить задачу по ID
 const getTodoById = async (req, res) => {
   try {
     const data = await readData();
@@ -78,20 +72,17 @@ const getTodoById = async (req, res) => {
   }
 };
 
-// Создать новую задачу
 const createTodo = async (req, res) => {
   try {
     const data = await readData();
-    
-    // Валидация
+
     const { day, task, time, priority } = req.body;
     if (!day || !task || !time) {
       return res.status(400).json({ 
         error: 'Поля day, task и time обязательны' 
       });
     }
-    
-    // Создание новой задачи
+
     const newTodo = {
       id: data.todos.length > 0 ? Math.max(...data.todos.map(t => t.id)) + 1 : 1,
       day,
@@ -111,7 +102,6 @@ const createTodo = async (req, res) => {
   }
 };
 
-// Обновить задачу
 const updateTodo = async (req, res) => {
   try {
     const data = await readData();
@@ -120,12 +110,11 @@ const updateTodo = async (req, res) => {
     if (index === -1) {
       return res.status(404).json({ error: 'Задача не найдена' });
     }
-    
-    // Обновление полей
+
     const updatedTodo = {
       ...data.todos[index],
       ...req.body,
-      id: data.todos[index].id // Защищаем ID от изменения
+      id: data.todos[index].id 
     };
     
     data.todos[index] = updatedTodo;
@@ -137,7 +126,6 @@ const updateTodo = async (req, res) => {
   }
 };
 
-// Удалить задачу
 const deleteTodo = async (req, res) => {
   try {
     const data = await readData();
@@ -160,7 +148,6 @@ const deleteTodo = async (req, res) => {
   }
 };
 
-// Получить задачи по дню недели
 const getTodosByDay = async (req, res) => {
   try {
     const data = await readData();
@@ -182,7 +169,7 @@ const getTodosByDay = async (req, res) => {
   }
 };
 
-// Отметить задачу как выполненную/невыполненную
+
 const toggleTodo = async (req, res) => {
   try {
     const data = await readData();
