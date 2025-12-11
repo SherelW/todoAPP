@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои дела на неделю</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e9e9e9;
+            border-radius: 5px;
+        }
+        
+        .controls input, 
+        .controls select, 
+        .controls button {
+            padding: 8px 12px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .controls button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .controls button:hover {
+            background: #45a049;
+        }
+        
+        .week-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .week-table th {
+            background: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .week-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+            min-height: 150px;
+        }
+        
+        .todo-item {
+            background: #f9f9f9;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .todo-item.completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+        
+        .todo-buttons {
+            margin-top: 5px;
+        }
+        
+        .todo-buttons button {
+            padding: 4px 8px;
+            margin-right: 5px;
+            font-size: 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .delete-btn {
+            background: #ff4444;
+            color: white;
+        }
+        
+        .toggle-btn {
+            background: #ffa500;
+            color: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 400px;
+            margin: 50px auto;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .form-buttons {
+            text-align: right;
+            margin-top: 20px;
+        }
+        
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Мои дела на неделю</h1>
+        
+        <div class="controls">
+            <button onclick="showAddForm()">+ Добавить дело</button>
+            <select id="filterDay" onchange="loadTodos()">
+                <option value="">Все дни</option>
+                <option value="Понедельник">Понедельник</option>
+                <option value="Вторник">Вторник</option>
+                <option value="Среда">Среда</option>
+                <option value="Четверг">Четверг</option>
+                <option value="Пятница">Пятница</option>
+                <option value="Суббота">Суббота</option>
+                <option value="Воскресенье">Воскресенье</option>
+            </select>
+            <select id="filterStatus" onchange="loadTodos()">
+                <option value="">Все дела</option>
+                <option value="true">Выполненные</option>
+                <option value="false">Невыполненные</option>
+            </select>
+            <button onclick="loadTodos()">Обновить</button>
+        </div>
+        
+        <div id="message" class="success"></div>
+        
+        <table class="week-table">
+            <thead>
+                <tr>
+                    <th width="14%">Понедельник</th>
+                    <th width="14%">Вторник</th>
+                    <th width="14%">Среда</th>
+                    <th width="14%">Четверг</th>
+                    <th width="14%">Пятница</th>
+                    <th width="14%">Суббота</th>
+                    <th width="14%">Воскресенье</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="day-Понедельник"></td>
+                    <td id="day-Вторник"></td>
+                    <td id="day-Среда"></td>
+                    <td id="day-Четверг"></td>
+                    <td id="day-Пятница"></td>
+                    <td id="day-Суббота"></td>
+                    <td id="day-Воскресенье"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 20px; color: #666;">
+            <strong>Справка:</strong>
+            <ul style="margin-top: 10px;">
+                <li>Нажмите "Выполнить" чтобы отметить дело</li>
+                <li>Нажмите "Удалить" чтобы удалить дело</li>
+                <li>Используйте фильтры для поиска</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для добавления/редактирования -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Добавить новое дело</h2>
+            <form id="todoForm">
+                <div class="form-group">
+                    <label>День недели:</label>
+                    <select id="day" required>
+                        <option value="Понедельник">Понедельник</option>
+                        <option value="Вторник">Вторник</option>
+                        <option value="Среда">Среда</option>
+                        <option value="Четверг">Четверг</option>
+                        <option value="Пятница">Пятница</option>
+                        <option value="Суббота">Суббота</option>
+                        <option value="Воскресенье">Воскресенье</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Что сделать:</label>
+                    <textarea id="task" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Время:</label>
+                    <input type="time" id="time" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Важность:</label>
+                    <select id="priority">
+                        <option value="high">Важно</option>
+                        <option value="medium" selected>Обычно</option>
+                        <option value="low">Не срочно</option>
+                    </select>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="button" onclick="hideModal()">Отмена</button>
+                    <button type="submit" style="background: #4CAF50; color: white;">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = '/api/todos';
+        let editingId = null;
+        
+        // Загрузить дела при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadTodos);
+        
+        // Показать модальное окно
+        function showAddForm() {
+            editingId = null;
+            document.getElementById('modalTitle').textContent = 'Добавить новое дело';
+            document.getElementById('todoForm').reset();
+            document.getElementById('modal').style.display = 'block';
+        }
+        
+        // Скрыть модальное окно
+        function hideModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+        
+        // Загрузить все дела
+        async function loadTodos() {
+            try {
+                const dayFilter = document.getElementById('filterDay').value;
+                const statusFilter = document.getElementById('filterStatus').value;
+                
+                let url = API_URL;
+                const params = [];
+                
+                if (dayFilter) params.push(`day=${dayFilter}`);
+                if (statusFilter) params.push(`completed=${statusFilter}`);
+                
+                if (params.length > 0) {
+                    url += '?' + params.join('&');
+                }
+                
+                const response = await fetch(url);
+                const todos = await response.json();
+                
+                showTodos(todos);
+                showMessage('Данные загружены', 'success');
+            } catch (error) {
+                showMessage('Ошибка загрузки: ' + error.message, 'error');
+            }
+        }
+        
+        // Показать дела в таблице
+        function showTodos(todos) {
+            // Очистить все ячейки
+            const days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+            days.forEach(day => {
+                document.getElementById(`day-${day}`).innerHTML = '';
+            });
+            
+            // Добавить дела в соответствующие ячейки
+            todos.forEach(todo => {
+                const dayCell = document.getElementById(`day-${todo.day}`);
+                if (dayCell) {
+                    const todoElement = document.createElement('div');
+                    todoElement.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                    
+                    // Цвет приоритета
+                    let priorityColor = '#4CAF50'; // средний по умолчанию
+                    if (todo.priority === 'high') priorityColor = '#ff4444';
+                    if (todo.priority === 'low') priorityColor = '#999';
+                    
+                    todoElement.style.borderLeftColor = priorityColor;
+                    
+                    todoElement.innerHTML = `
+                        <div><strong>${todo.time}</strong></div>
+                        <div>${todo.task}</div>
+                        <div class="todo-buttons">
+                            <button class="toggle-btn" onclick="toggleTodo(${todo.id})">
+                                ${todo.completed ? 'Отменить' : 'Выполнить'}
+                            </button>
+                            <button class="delete-btn" onclick="deleteTodo(${todo.id})">Удалить</button>
+                        </div>
+                    `;
+                    
+                    dayCell.appendChild(todoElement);
+                }
+            });
+            
+            // Если в ячейке пусто - показать сообщение
+            days.forEach(day => {
+                const cell = document.getElementById(`day-${day}`);
+                if (cell.children.length === 0) {
+                    cell.innerHTML = '<div style="color: #999; text-align: center;">Нет дел</div>';
+                }
+            });
+        }
+        
+        // Добавить/обновить дело
+        document.getElementById('todoForm').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const todoData = {
+                day: document.getElementById('day').value,
+                task: document.getElementById('task').value,
+                time: document.getElementById('time').value,
+                priority: document.getElementById('priority').value
+            };
+            
+            try {
+                let response;
+                
+                if (editingId) {
+                    // Обновить существующее дело
+                    response = await fetch(`${API_URL}/${editingId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(todoData)
+                    });
+                } else {
+                    // Добавить новое дело
+                    response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(todoData)
+                    });
+                }
+                
+                if (response.ok) {
+                    hideModal();
+                    loadTodos();
+                    showMessage(editingId ? 'Дело обновлено' : 'Дело добавлено', 'success');
+                } else {
+                    const error = await response.json();
+                    showMessage('Ошибка: ' + error.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Ошибка сети', 'error');
+            }
+        };
+        
+        // Переключить статус выполнения
+        async function toggleTodo(id) {
+            try {
+                const response = await fetch(`${API_URL}/${id}/toggle`, {
+                    method: 'PATCH'
+                });
+                
+                if (response.ok) {
+                    loadTodos();
+                    showMessage('Статус изменен', 'success');
+                }
+            } catch (error) {
+                showMessage('Ошибка', 'error');
+            }
+        }
+        
+        // Удалить дело
+        async function deleteTodo(id) {
+            if (!confirm('Удалить это дело?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    loadTodos();
+                    showMessage('Дело удалено', 'success');
+                }
+            } catch (error) {
+                showMessage('Ошибка удаления', 'error');
+            }
+        }
+        
+        // Показать сообщение
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = type;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Закрыть модальное окно при клике вне его
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('modal')) {
+                hideModal();
+            }
+        };
+    </script>
+</body>
+</html>
